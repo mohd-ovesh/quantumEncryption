@@ -13,6 +13,7 @@ MSG_READY         = "READY"
 MSG_CHAT          = "CHAT"
 MSG_ERROR_RATE    = "ERROR_RATE"
 MSG_ABORT         = "ABORT"
+MSG_MEASUREMENT_RESULTS = "MEASUREMENT_RESULTS"
 
 def send_message(sock, msg_type: str, payload: Any):
     packet        = json.dumps({'type': msg_type, 'payload': payload}).encode('utf-8')
