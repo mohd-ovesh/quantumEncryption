@@ -287,6 +287,60 @@ class QuantumLogger:
         self.session_data['security_events'].append(event)
         print(f"[Security Event] [{severity}] {event_type}: {details}")
 
+    # Add this method inside the QuantumLogger class in utils/logger.py
+
+    def log_image_transfer(
+            self,
+            direction  : str,
+            file_name  : str,
+            file_size  : int,
+            file_hash  : str,
+            num_chunks : int,
+            success    : bool
+    ):
+        """
+        Log an image transfer event.
+
+        Args:
+            direction  : 'SENT' or 'RECEIVED'
+            file_name  : name of the image file
+            file_size  : size in bytes
+            file_hash  : SHA-256 hash of file
+            num_chunks : how many chunks were transferred
+            success    : True if transfer completed successfully
+        """
+        record = {
+            'timestamp' : datetime.datetime.now().isoformat(),
+            'direction' : direction,
+            'file_name' : file_name,
+            'file_size' : file_size,
+            'file_hash' : file_hash,
+            'num_chunks': num_chunks,
+            'success'   : success
+        }
+
+        # Append to chat log file
+        ts   = datetime.datetime.now().strftime("%H:%M:%S")
+        line = (
+            f"[{ts}] {'📤' if direction=='SENT' else '📥'} IMAGE {direction:8s} | "
+            f"File: {file_name}  Size: {file_size:,} bytes  "
+            f"Chunks: {num_chunks}  "
+            f"{'✅ OK' if success else '❌ FAILED'}\n"
+            f"{'':>12}          | Hash: {file_hash[:48]}...\n"
+            f"{'-'*70}\n"
+        )
+
+        with self.lock:
+            with open(self.chat_file, 'a') as f:
+                f.write(line)
+
+        # Track in session data
+        if 'image_transfers' not in self.session_data:
+            self.session_data['image_transfers'] = []
+        self.session_data['image_transfers'].append(record)
+
+        print(f"  [Logger] Image transfer logged: {direction} {file_name}")
+
     # ── Session Summary ──────────────────────────────────────────────────────
 
     def save_session_summary(self):
